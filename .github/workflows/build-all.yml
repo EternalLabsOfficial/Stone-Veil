@@ -50,7 +50,7 @@ jobs:
       - name: Upload desktop files
         uses: actions/upload-artifact@v4
         with:
-          name: stone-veil-${{ matrix.command }}
+          name: stone-veil-${{ matrix.os }}
           path: buildkit/stone-veil-cloud-build-kit/stone-veil-multiplatform/desktop/dist/*
           if-no-files-found: error
 
