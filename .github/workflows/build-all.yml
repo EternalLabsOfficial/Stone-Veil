@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
   push:
     paths:
-      - 'stone-veil-cloud-build-kit-v0.5.5.zip'
+      - 'stone-veil-cloud-build-kit-v0.5.6.zip'
       - '.github/workflows/build-all.yml'
 
 permissions:
@@ -33,7 +33,7 @@ jobs:
       - name: Extract project ZIP
         run: |
           mkdir buildkit
-          unzip -q stone-veil-cloud-build-kit-v0.5.5.zip -d buildkit
+          unzip -q stone-veil-cloud-build-kit-v0.5.6.zip -d buildkit
 
       - uses: actions/setup-node@v4
         with:
@@ -64,7 +64,7 @@ jobs:
       - name: Extract project ZIP
         run: |
           mkdir buildkit
-          unzip -q stone-veil-cloud-build-kit-v0.5.5.zip -d buildkit
+          unzip -q stone-veil-cloud-build-kit-v0.5.6.zip -d buildkit
 
       - uses: actions/setup-java@v4
         with:
