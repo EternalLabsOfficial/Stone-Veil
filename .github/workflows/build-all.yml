@@ -1,10 +1,11 @@
+
 name: Build Stone Veil for all platforms
 
 on:
   workflow_dispatch:
   push:
     paths:
-      - 'stone-veil-multiplatform/**'
+      - 'stone-veil-cloud-build-kit-v0.5.5.zip'
       - '.github/workflows/build-all.yml'
 
 permissions:
@@ -23,46 +24,64 @@ jobs:
             command: dist:mac
           - os: ubuntu-latest
             command: dist:linux
+
     runs-on: ${{ matrix.os }}
-    defaults:
-      run:
-        working-directory: stone-veil-multiplatform/desktop
+
     steps:
       - uses: actions/checkout@v4
+
+      - name: Extract project ZIP
+        run: |
+          mkdir buildkit
+          unzip -q stone-veil-cloud-build-kit-v0.5.5.zip -d buildkit
+
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
-          cache-dependency-path: stone-veil-multiplatform/desktop/package.json
+
       - name: Install dependencies
+        working-directory: buildkit/stone-veil-cloud-build-kit/stone-veil-multiplatform/desktop
         run: npm install
-      - name: Build installer
+
+      - name: Build desktop version
+        working-directory: buildkit/stone-veil-cloud-build-kit/stone-veil-multiplatform/desktop
         run: npm run ${{ matrix.command }}
+
       - name: Upload desktop files
         uses: actions/upload-artifact@v4
         with:
           name: stone-veil-${{ matrix.command }}
-          path: stone-veil-multiplatform/desktop/dist/*
+          path: buildkit/stone-veil-cloud-build-kit/stone-veil-multiplatform/desktop/dist/*
           if-no-files-found: error
 
   android:
     name: Android APK
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
+
+      - name: Extract project ZIP
+        run: |
+          mkdir buildkit
+          unzip -q stone-veil-cloud-build-kit-v0.5.5.zip -d buildkit
+
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
+
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.9'
-      - name: Build debug APK
-        working-directory: stone-veil-multiplatform/android
+
+      - name: Build Android APK
+        working-directory: buildkit/stone-veil-cloud-build-kit/stone-veil-multiplatform/android
         run: gradle assembleDebug
-      - name: Upload APK
+
+      - name: Upload Android APK
         uses: actions/upload-artifact@v4
         with:
           name: stone-veil-android-apk
-          path: stone-veil-multiplatform/android/app/build/outputs/apk/debug/app-debug.apk
+          path: buildkit/stone-veil-cloud-build-kit/stone-veil-multiplatform/android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
