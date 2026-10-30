@@ -1,0 +1,68 @@
+name: Build Stone Veil for all platforms
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'stone-veil-multiplatform/**'
+      - '.github/workflows/build-all.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  desktop:
+    name: Desktop (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            command: dist:win
+          - os: macos-latest
+            command: dist:mac
+          - os: ubuntu-latest
+            command: dist:linux
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        working-directory: stone-veil-multiplatform/desktop
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: stone-veil-multiplatform/desktop/package.json
+      - name: Install dependencies
+        run: npm install
+      - name: Build installer
+        run: npm run ${{ matrix.command }}
+      - name: Upload desktop files
+        uses: actions/upload-artifact@v4
+        with:
+          name: stone-veil-${{ matrix.command }}
+          path: stone-veil-multiplatform/desktop/dist/*
+          if-no-files-found: error
+
+  android:
+    name: Android APK
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+      - name: Build debug APK
+        working-directory: stone-veil-multiplatform/android
+        run: gradle assembleDebug
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: stone-veil-android-apk
+          path: stone-veil-multiplatform/android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
